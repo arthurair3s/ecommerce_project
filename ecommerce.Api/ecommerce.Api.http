@@ -1,0 +1,6 @@
+@ecommerce_crud_HostAddress = http://localhost:5177
+
+GET {{ecommerce_crud_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

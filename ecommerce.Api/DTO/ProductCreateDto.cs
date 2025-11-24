@@ -2,7 +2,7 @@
 
 namespace ecommerce_crud.DTO
 {
-    public class ProductUpdateDto
+    public class ProductCreateDto
     {
         public string Model { get; set; }
         public DateTime ReleaseDate { get; set; }

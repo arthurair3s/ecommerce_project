@@ -5,6 +5,7 @@ namespace ecommerce_crud.DTO
     public class ProductPatchDto
     {
         public string? Model { get; set; }
+        public DateTime? ReleaseDate { get; set; }
         public string? Specifications { get; set; }
         public decimal? Price { get; set; }
         public int? StockQuantity { get; set; }

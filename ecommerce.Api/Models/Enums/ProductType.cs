@@ -2,7 +2,7 @@
 {
     public enum ProductType
     {
-        Celular,     // 0
+        Smartphone,     // 0
         //Produto2,     1
         //Produto3,     2
         //Produto4,     3

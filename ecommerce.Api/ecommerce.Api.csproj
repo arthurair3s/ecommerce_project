@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\NovaPasta\**" />
+    <Compile Remove="DTO\NewFolder\**" />
     <Content Remove="Controllers\NovaPasta\**" />
+    <Content Remove="DTO\NewFolder\**" />
     <EmbeddedResource Remove="Controllers\NovaPasta\**" />
+    <EmbeddedResource Remove="DTO\NewFolder\**" />
     <None Remove="Controllers\NovaPasta\**" />
+    <None Remove="DTO\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>

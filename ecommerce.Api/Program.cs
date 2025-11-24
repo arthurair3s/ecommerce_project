@@ -1,4 +1,4 @@
-using ecommerce_crud.DTO;
+using ecommerce_crud.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

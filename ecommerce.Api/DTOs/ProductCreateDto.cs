@@ -4,7 +4,7 @@ namespace ecommerce_crud.DTO
 {
     public class ProductCreateDto
     {
-        public string Model { get; set; }
+        public string?Model { get; set; }
         public DateTime ReleaseDate { get; set; }
         public string Specifications { get; set; }
         public decimal Price { get; set; }

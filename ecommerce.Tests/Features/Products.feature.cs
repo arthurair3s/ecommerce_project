@@ -148,7 +148,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
  await testRunner.GivenAsync("que eu tenho um produto valido:", ((string)(null)), table1, "Dado ");
 #line hidden
 #line 13
- await testRunner.WhenAsync("eu envio uma requisição POST para \"/products\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
+ await testRunner.WhenAsync("eu envio uma requisição POST para \"/api/products\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
 #line hidden
 #line 14
  await testRunner.ThenAsync("a resposta deve ter o código de status 201", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");

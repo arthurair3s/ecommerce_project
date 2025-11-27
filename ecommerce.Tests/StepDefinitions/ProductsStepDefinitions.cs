@@ -37,7 +37,10 @@ namespace ecommerce.Tests.StepDefinitions
             _productRequest = new ProductCreateDto
             {
                 Model = row["Model"],
-                ReleaseDate = DateTime.Parse(row["ReleaseDate"]),
+                ReleaseDate = DateTime.SpecifyKind(
+                    DateTime.Parse(row["ReleaseDate"]),
+                    DateTimeKind.Utc
+                ),
                 Specifications = row["Specifications"],
                 Price = decimal.Parse(row["Price"]),
                 StockQuantity = int.Parse(row["StockQuantity"]),

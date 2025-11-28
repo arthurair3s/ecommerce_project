@@ -30,6 +30,12 @@ namespace ecommerce.Tests.Drivers
             return _lastResponse;
         }
 
+        public async Task<HttpResponseMessage> GetAsync(string endpoint)
+        {
+            _lastResponse = await _httpClient.GetAsync(endpoint);
+            return _lastResponse;
+        }
+
         public HttpResponseMessage GetLastResponse()
         {
             if (_lastResponse == null)
@@ -57,5 +63,6 @@ namespace ecommerce.Tests.Drivers
 
             return await _lastResponse.Content.ReadAsStringAsync();
         }
+
     }
 }

@@ -17,6 +17,7 @@ namespace ecommerce.Tests.StepDefinitions
         private ProductCreateDto _productRequest = null!;
         private HttpResponseMessage _response = null!;
         private ProductResponse _productResponse = null!;
+        private List<ProductResponse>? _productListResponse;
 
         public ProductsStepDefinitions(ScenarioContext scenarioContext)
         {
@@ -65,8 +66,8 @@ namespace ecommerce.Tests.StepDefinitions
         {
             _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
 
-            Assert.That(_productResponse, Is.Not.Null);
-            Assert.That(_productResponse.Id, Is.GreaterThan(0));
+            Assert.That(_productResponse, Is.Not.Null, "O produto é nulo.");
+            Assert.That(_productResponse.Id, Is.GreaterThan(0), "Produto com ID inválido encontrado.");
 
             // Valida dados
             Assert.That(_productResponse.Model, Is.EqualTo(_productRequest.Model));
@@ -83,5 +84,48 @@ namespace ecommerce.Tests.StepDefinitions
                 _productResponse.DeletedAt
             );
         }
+
+        [Given(@"que existem produtos cadastrados no sistema")]
+        public void DadoQueExistemProdutosCadastradosNoSistema()
+        {
+        }
+
+        [When(@"eu envio uma requisição GET para ""(.*)""")]
+        public async Task QuandoEuEnvioUmaRequisicaoGETPara(string endpoint)
+        {
+            _response = await _apiDriver.GetAsync(endpoint);
+        }
+
+        [Then(@"o corpo da resposta deve conter a lista de produtos cadastrados")]
+        public async Task EntaoOCorpoDaRespostaDeveConterAListaDeProdutosCadastrados()
+        {
+            _productListResponse = await _apiDriver.GetResponseBodyAs<List<ProductResponse>>();
+
+            Assert.That(_productListResponse, Is.Not.Null, "A lista de produtos é nula.");
+            Assert.That(_productListResponse.Any(), Is.True, "A lista de produtos está vazia.");
+
+            foreach (var product in _productListResponse)
+            {
+                // Valida ID
+                Assert.That(product.Id, Is.GreaterThan(0), "Produto com ID inválido encontrado.");
+
+                // Valida propriedades básicas
+                Assert.That(product.Model, Is.Not.Null.And.Not.Empty);
+                Assert.That(product.Specifications, Is.Not.Null.And.Not.Empty);
+                Assert.That(product.Price, Is.GreaterThan(0));
+                Assert.That(product.StockQuantity, Is.GreaterThanOrEqualTo(0));
+                Assert.That(product.Type, Is.GreaterThanOrEqualTo(0));
+
+                AssertHelpers.AssertTimestampsAreValidForList(
+                    product.CreatedAt,
+                    product.UpdatedAt,
+                    product.DeletedAt
+                );
+
+            }
+
+        }
+    
+
     }
 }

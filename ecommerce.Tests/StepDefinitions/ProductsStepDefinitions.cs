@@ -125,7 +125,19 @@ namespace ecommerce.Tests.StepDefinitions
             }
 
         }
-    
+
+        [Given(@"que existe um produto com ID (.*) no sistema")]
+        public void DadoQueExisteUmProdutoComIDNoSistema(int Id)
+        {
+            //TODO
+        }
+
+        [Then("o corpo da resposta deve conter os detalhes do produto com ID {int}")]
+        public void ThenOCorpoDaRespostaDeveConterOsDetalhesDoProdutoComID(int p0)
+        {
+            //TODO
+        }
+
 
     }
 }

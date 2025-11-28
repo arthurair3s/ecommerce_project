@@ -107,7 +107,7 @@ namespace Ecommerce.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 7);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 8);
         }
         
         [global::NUnit.Framework.TestAttribute()]
@@ -147,7 +147,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
                             "50",
                             "Smartphone"});
 #line 11
- await testRunner.GivenAsync("que eu tenho um produto valido:", ((string)(null)), table1, "Dado ");
+ await testRunner.GivenAsync("que eu recebo um produto valido:", ((string)(null)), table1, "Dado ");
 #line hidden
 #line 14
  await testRunner.WhenAsync("eu envio uma requisição POST para \"/api/products\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
@@ -184,16 +184,30 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
+                global::Reqnroll.Table table2 = new global::Reqnroll.Table(new string[] {
+                            "Model",
+                            "ReleaseDate",
+                            "Specifications",
+                            "Price",
+                            "StockQuantity",
+                            "Type"});
+                table2.AddRow(new string[] {
+                            "IPhone",
+                            "2024-01-15",
+                            "128GB, 6GB RAM",
+                            "999.99",
+                            "50",
+                            "Smartphone"});
 #line 20
- await testRunner.GivenAsync("que existem produtos cadastrados no sistema", ((string)(null)), ((global::Reqnroll.Table)(null)), "Dado ");
-#line hidden
-#line 21
- await testRunner.WhenAsync("eu envio uma requisição GET para \"/api/products\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
-#line hidden
-#line 22
- await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");
+ await testRunner.GivenAsync("que eu tenho produtos validos:", ((string)(null)), table2, "Dado ");
 #line hidden
 #line 23
+ await testRunner.WhenAsync("eu envio uma requisição GET para \"/api/products\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
+#line hidden
+#line 24
+ await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");
+#line hidden
+#line 25
  await testRunner.AndAsync("o corpo da resposta deve conter a lista de produtos cadastrados", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
 #line hidden
             }
@@ -221,7 +235,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a obtenção de um produto por ID deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 26
+#line 28
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -231,18 +245,44 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
-#line 27
+#line 29
  await testRunner.GivenAsync(string.Format("que existe um produto com ID {0} no sistema", id), ((string)(null)), ((global::Reqnroll.Table)(null)), "Dado ");
 #line hidden
-#line 28
+#line 30
  await testRunner.WhenAsync("eu envio uma requisição GET para \"/api/products/1\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
 #line hidden
-#line 29
+#line 31
  await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");
 #line hidden
-#line 30
+#line 32
  await testRunner.AndAsync(string.Format("o corpo da resposta deve conter os detalhes do produto com ID {0}", id), ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
 #line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::NUnit.Framework.TestAttribute()]
+        [global::NUnit.Framework.DescriptionAttribute("a atualização completa de um produto deve ser bem-sucedida")]
+        [global::NUnit.Framework.CategoryAttribute("UPDATE")]
+        public async global::System.Threading.Tasks.Task AAtualizacaoCompletaDeUmProdutoDeveSerBem_Sucedida()
+        {
+            string[] tagsOfScenario = new string[] {
+                    "UPDATE"};
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            string pickleIndex = "5";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a atualização completa de um produto deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 41
+this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
             }
             await this.ScenarioCleanupAsync();
         }

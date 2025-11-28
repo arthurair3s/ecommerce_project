@@ -8,7 +8,7 @@ Funcionalidade: Produtos do E-commerce
 
 @POST
 Cenário: a criação de um produto deve ser bem-sucedida
-	Dado que eu tenho um produto valido:
+	Dado que eu recebo um produto valido:
 		| Model  | ReleaseDate | Specifications | Price  | StockQuantity |    Type    |
 		| IPhone | 2024-01-15  | 128GB, 6GB RAM | 999.99 |            50 | Smartphone |
 	Quando eu envio uma requisição POST para "/api/products"
@@ -17,7 +17,9 @@ Cenário: a criação de um produto deve ser bem-sucedida
 
 @GET
 Cenário: a listagem de produtos deve ser bem-sucedida
-	Dado que existem produtos cadastrados no sistema
+	Dado que eu tenho produtos validos:
+		| Model  | ReleaseDate | Specifications | Price  | StockQuantity |    Type    |
+		| IPhone | 2024-01-15  | 128GB, 6GB RAM | 999.99 |            50 | Smartphone |
 	Quando eu envio uma requisição GET para "/api/products"
 	Então a resposta deve ter o código de status 200
 	E o corpo da resposta deve conter a lista de produtos cadastrados

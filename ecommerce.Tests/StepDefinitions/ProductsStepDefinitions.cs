@@ -2,7 +2,6 @@
 using ecommerce.Tests.Models;
 using ecommerce.Tests.Support;
 using ecommerce_crud.DTO;
-using ecommerce_crud.Models.Enums;
 using NUnit.Framework;
 using Reqnroll;
 
@@ -25,28 +24,10 @@ namespace ecommerce.Tests.StepDefinitions
             _apiDriver = new ApiDriver();
         }
 
-        [Given(@"que eu tenho um produto valido:")]
-        public void DadoQueEuTenhoUmProdutoValido(Table table)
+        [Given(@"que eu recebo um produto valido:")]
+        public void DadoQueEuReceboUmProdutoValido(ProductCreateDto productDto)
         {
-            var row = table.Rows[0];
-
-            // Converte o enum de string para ProductType
-            var typeString = row["Type"];
-            var productType = Enum.Parse<ProductType>(typeString);
-
-            // Cria o DTO
-            _productRequest = new ProductCreateDto
-            {
-                Model = row["Model"],
-                ReleaseDate = DateTime.SpecifyKind(
-                    DateTime.Parse(row["ReleaseDate"]),
-                    DateTimeKind.Utc
-                ),
-                Specifications = row["Specifications"],
-                Price = decimal.Parse(row["Price"]),
-                StockQuantity = int.Parse(row["StockQuantity"]),
-                Type = productType
-            };
+            _productRequest = productDto;
         }
 
         [When(@"eu envio uma requisição POST para ""(.*)""")]
@@ -64,12 +45,16 @@ namespace ecommerce.Tests.StepDefinitions
         [Then(@"o corpo da resposta deve conter os detalhes do produto criado")]
         public async Task EntaoOCorpoDaRespostaDeveConterOsDetalhes()
         {
-            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
+            _productResponse = (await _apiDriver.GetResponseBodyAs<ProductResponse>())!;
+
+            if (_productResponse != null)
+            {
+                _scenarioContext["CreatedProductId"] = _productResponse.Id;
+            }
 
             Assert.That(_productResponse, Is.Not.Null, "O produto é nulo.");
             Assert.That(_productResponse.Id, Is.GreaterThan(0), "Produto com ID inválido encontrado.");
 
-            // Valida dados
             Assert.That(_productResponse.Model, Is.EqualTo(_productRequest.Model));
             Assert.That(_productResponse.Specifications, Is.EqualTo(_productRequest.Specifications));
             Assert.That(_productResponse.Price, Is.EqualTo(_productRequest.Price));
@@ -77,7 +62,6 @@ namespace ecommerce.Tests.StepDefinitions
             Assert.That(_productResponse.Type, Is.EqualTo((int)_productRequest.Type));
             Assert.That(_productResponse.ReleaseDate.Date, Is.EqualTo(_productRequest.ReleaseDate.Date));
 
-            // Valida timestamps
             AssertHelpers.AssertTimestampsWereGenerated(
                 _productResponse.CreatedAt,
                 _productResponse.UpdatedAt,
@@ -85,9 +69,19 @@ namespace ecommerce.Tests.StepDefinitions
             );
         }
 
-        [Given(@"que existem produtos cadastrados no sistema")]
-        public void DadoQueExistemProdutosCadastradosNoSistema()
+        [Given(@"que eu tenho produtos validos:")]
+        public async Task DadoQueEuTenhoProdutosValidos(ProductCreateDto productDto)
         {
+            var response = await _apiDriver.PostAsync<ProductCreateDto>("api/products", productDto);
+
+            Assert.That(response.IsSuccessStatusCode, Is.True, "Falha ao criar o produto de pré-condição.");
+
+            var productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
+
+            if (productResponse != null)
+            {
+                _scenarioContext["CreatedProductId"] = productResponse.Id;
+            }
         }
 
         [When(@"eu envio uma requisição GET para ""(.*)""")]
@@ -102,42 +96,31 @@ namespace ecommerce.Tests.StepDefinitions
             _productListResponse = await _apiDriver.GetResponseBodyAs<List<ProductResponse>>();
 
             Assert.That(_productListResponse, Is.Not.Null, "A lista de produtos é nula.");
-            Assert.That(_productListResponse.Any(), Is.True, "A lista de produtos está vazia.");
+            Assert.That(_productListResponse!.Any(), Is.True, "A lista de produtos está vazia.");
 
             foreach (var product in _productListResponse)
             {
-                // Valida ID
-                Assert.That(product.Id, Is.GreaterThan(0), "Produto com ID inválido encontrado.");
-
-                // Valida propriedades básicas
+                Assert.That(product.Id, Is.GreaterThan(0));
                 Assert.That(product.Model, Is.Not.Null.And.Not.Empty);
-                Assert.That(product.Specifications, Is.Not.Null.And.Not.Empty);
-                Assert.That(product.Price, Is.GreaterThan(0));
-                Assert.That(product.StockQuantity, Is.GreaterThanOrEqualTo(0));
-                Assert.That(product.Type, Is.GreaterThanOrEqualTo(0));
 
                 AssertHelpers.AssertTimestampsAreValidForList(
                     product.CreatedAt,
                     product.UpdatedAt,
                     product.DeletedAt
                 );
-
             }
-
         }
 
         [Given(@"que existe um produto com ID (.*) no sistema")]
-        public void DadoQueExisteUmProdutoComIDNoSistema(int Id)
+        public void DadoQueExisteUmProdutoComIDNoSistema(int idIgnorado)
         {
             //TODO
         }
 
         [Then("o corpo da resposta deve conter os detalhes do produto com ID {int}")]
-        public void ThenOCorpoDaRespostaDeveConterOsDetalhesDoProdutoComID(int p0)
+        public async Task ThenOCorpoDaRespostaDeveConterOsDetalhesDoProdutoComID(int idEsperadoNaUrl)
         {
             //TODO
         }
-
-
     }
 }

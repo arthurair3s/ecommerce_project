@@ -72,5 +72,11 @@ namespace ecommerce.Tests.Drivers
             return await _lastResponse.Content.ReadAsStringAsync();
         }
 
+        public async Task<HttpResponseMessage> DeleteAsync(string endpoint)
+        {
+            _lastResponse = await _httpClient.DeleteAsync(endpoint);
+            return _lastResponse;
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using Microsoft.Extensions.Configuration;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace ecommerce.Tests.Drivers
@@ -10,7 +11,14 @@ namespace ecommerce.Tests.Drivers
 
         public ApiDriver(string? baseUrl = null)
         {
-            var apiBaseUrl = baseUrl ?? "https://localhost:7113";
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var configUrl = configuration["ApiSettings:BaseUrl"];
+            var apiBaseUrl = baseUrl ?? configUrl ?? "https://localhost:7113";
 
             var handler = new HttpClientHandler
             {
@@ -20,7 +28,7 @@ namespace ecommerce.Tests.Drivers
 
             _httpClient = new HttpClient(handler)
             {
-                BaseAddress = new Uri("https://localhost:7113")
+                BaseAddress = new Uri(apiBaseUrl)
             };
         }
 

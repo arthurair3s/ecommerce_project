@@ -107,7 +107,7 @@ namespace Ecommerce.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 4);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 7);
         }
         
         [global::NUnit.Framework.TestAttribute()]
@@ -195,6 +195,53 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
 #line 23
  await testRunner.AndAsync("o corpo da resposta deve conter a lista de produtos cadastrados", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [global::NUnit.Framework.TestAttribute()]
+        [global::NUnit.Framework.DescriptionAttribute("a obtenção de um produto por ID deve ser bem-sucedida")]
+        [global::NUnit.Framework.CategoryAttribute("GET")]
+        [global::NUnit.Framework.TestCaseAttribute("3", "2", null)]
+        [global::NUnit.Framework.TestCaseAttribute("4", "3", null)]
+        [global::NUnit.Framework.TestCaseAttribute("7", "4", null)]
+        public async global::System.Threading.Tasks.Task AObtencaoDeUmProdutoPorIDDeveSerBem_Sucedida(string id, string @__pickleIndex, string[] exampleTags)
+        {
+            string[] @__tags = new string[] {
+                    "GET"};
+            if ((exampleTags != null))
+            {
+                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
+            }
+            string[] tagsOfScenario = @__tags;
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            argumentsOfScenario.Add("id", id);
+            string pickleIndex = @__pickleIndex;
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a obtenção de um produto por ID deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string[] tagsOfRule = ((string[])(null));
+            global::Reqnroll.RuleInfo ruleInfo = null;
+#line 26
+this.ScenarioInitialize(scenarioInfo, ruleInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                await testRunner.SkipScenarioAsync();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 27
+ await testRunner.GivenAsync(string.Format("que existe um produto com ID {0} no sistema", id), ((string)(null)), ((global::Reqnroll.Table)(null)), "Dado ");
+#line hidden
+#line 28
+ await testRunner.WhenAsync("eu envio uma requisição GET para \"/api/products/1\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
+#line hidden
+#line 29
+ await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");
+#line hidden
+#line 30
+ await testRunner.AndAsync(string.Format("o corpo da resposta deve conter os detalhes do produto com ID {0}", id), ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

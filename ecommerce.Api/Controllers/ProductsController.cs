@@ -53,8 +53,8 @@ namespace ecommerce_crud.Controllers
                 Price = dto.Price,
                 StockQuantity = dto.StockQuantity,
                 Type = dto.Type,
-                CreatedAt = now,
-                UpdatedAt = now,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
                 DeletedAt = null
             };
 

@@ -6,6 +6,7 @@ Funcionalidade: Produtos do E-commerce
   Para gerenciar meus produtos eficientemente
   Ações: POST, GET, PATCH, PUT e DELETE
 
+@POST
 Cenário: a criação de um produto deve ser bem-sucedida
 	Dado que eu tenho um produto valido:
 		| Model  | ReleaseDate | Specifications | Price  | StockQuantity |    Type    |
@@ -13,3 +14,11 @@ Cenário: a criação de um produto deve ser bem-sucedida
 	Quando eu envio uma requisição POST para "/api/products"
 	Então a resposta deve ter o código de status 201
 	E o corpo da resposta deve conter os detalhes do produto criado
+
+@GET
+Cenário: a listagem de produtos deve ser bem-sucedida
+	Dado que existem produtos cadastrados no sistema
+	Quando eu envio uma requisição GET para "/api/products"
+	Então a resposta deve ter o código de status 200
+	E o corpo da resposta deve conter a lista de produtos cadastrados
+	

@@ -123,7 +123,7 @@ namespace ecommerce_crud.Controllers
 
             await _appDbContext.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(product);
         }
 
         [HttpDelete("{id}")]

@@ -3,7 +3,8 @@ using ecommerce.Tests.Models;
 using ecommerce.Tests.Support;
 using ecommerce_crud.DTO;
 using NUnit.Framework;
-using Reqnroll;
+using Reqnroll.Assist;
+using System.Threading.Tasks;
 
 namespace ecommerce.Tests.StepDefinitions
 {
@@ -45,22 +46,19 @@ namespace ecommerce.Tests.StepDefinitions
         [Then(@"o corpo da resposta deve conter os detalhes do produto criado")]
         public async Task EntaoOCorpoDaRespostaDeveConterOsDetalhes()
         {
-            _productResponse = (await _apiDriver.GetResponseBodyAs<ProductResponse>())!;
+            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
 
-            if (_productResponse != null)
-            {
-                _scenarioContext["CreatedProductId"] = _productResponse.Id;
-            }
+            _scenarioContext["CreatedProductId"] = _productResponse.Id;
 
             Assert.That(_productResponse, Is.Not.Null, "O produto é nulo.");
             Assert.That(_productResponse.Id, Is.GreaterThan(0), "Produto com ID inválido encontrado.");
 
             Assert.That(_productResponse.Model, Is.EqualTo(_productRequest.Model));
+            Assert.That(_productResponse.ReleaseDate.Date, Is.EqualTo(_productRequest.ReleaseDate.Date));
             Assert.That(_productResponse.Specifications, Is.EqualTo(_productRequest.Specifications));
             Assert.That(_productResponse.Price, Is.EqualTo(_productRequest.Price));
             Assert.That(_productResponse.StockQuantity, Is.EqualTo(_productRequest.StockQuantity));
             Assert.That(_productResponse.Type, Is.EqualTo((int)_productRequest.Type));
-            Assert.That(_productResponse.ReleaseDate.Date, Is.EqualTo(_productRequest.ReleaseDate.Date));
 
             AssertHelpers.AssertTimestampsWereGenerated(
                 _productResponse.CreatedAt,
@@ -76,17 +74,22 @@ namespace ecommerce.Tests.StepDefinitions
 
             Assert.That(response.IsSuccessStatusCode, Is.True, "Falha ao criar o produto de pré-condição.");
 
-            var productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
+            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
 
-            if (productResponse != null)
-            {
-                _scenarioContext["CreatedProductId"] = productResponse.Id;
-            }
+            Assert.That(_productResponse, Is.Not.Null, "A API retornou um corpo nulo na criação do produto.");
+
+            _scenarioContext["CreatedProductId"] = _productResponse.Id;
         }
 
         [When(@"eu envio uma requisição GET para ""(.*)""")]
         public async Task QuandoEuEnvioUmaRequisicaoGETPara(string endpoint)
         {
+            if (endpoint.Contains("<id>"))
+            {
+                var productId = (int)_scenarioContext["CreatedProductId"];
+                endpoint = endpoint.Replace("<id>", productId.ToString());
+            }
+
             _response = await _apiDriver.GetAsync(endpoint);
         }
 
@@ -111,16 +114,71 @@ namespace ecommerce.Tests.StepDefinitions
             }
         }
 
-        [Given(@"que existe um produto com ID (.*) no sistema")]
-        public void DadoQueExisteUmProdutoComIDNoSistema(int idIgnorado)
+        [Given(@"que eu tenho um produto valido:")]
+        public async Task DadoQueEuTenhoUmProdutoValido(ProductCreateDto productDto)
         {
-            //TODO
+            var response = await _apiDriver.PostAsync<ProductCreateDto>("api/products", productDto);
+
+            Assert.That(response.IsSuccessStatusCode, Is.True, "Falha ao criar o produto de pré-condição.");
+
+            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
+
+            Assert.That(_productResponse, Is.Not.Null, "O produto retornado é nulo.");
+            Assert.That(_productResponse.Id, Is.GreaterThan(0), "Produto retornou ID inválido.");
+
+            _scenarioContext["CreatedProductId"] = _productResponse.Id;
+            _scenarioContext["CreatedProductObj"] = _productResponse;
         }
 
-        [Then("o corpo da resposta deve conter os detalhes do produto com ID {int}")]
-        public async Task ThenOCorpoDaRespostaDeveConterOsDetalhesDoProdutoComID(int idEsperadoNaUrl)
+        [Then(@"o corpo da resposta deve conter os detalhes do produto cadastrado")]
+        public async Task EntaoOCorpoDaRespostaDeveConterOsDetalhesDoProdutoCadastrado()
         {
-            //TODO
+            var expected = (ProductResponse)_scenarioContext["CreatedProductObj"];
+
+            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
+
+            Assert.That(_productResponse.Model, Is.EqualTo(expected.Model));
+            Assert.That(_productResponse.ReleaseDate.Date, Is.EqualTo(expected.ReleaseDate.Date));
+            Assert.That(_productResponse.Specifications, Is.EqualTo(expected.Specifications));
+            Assert.That(_productResponse.Price, Is.EqualTo(expected.Price));
+            Assert.That(_productResponse.StockQuantity, Is.EqualTo(expected.StockQuantity));
+            Assert.That(_productResponse.Type, Is.EqualTo(expected.Type));
+        }
+
+        [Given("eu recebo os novos dados do produto:")]
+        public void DadoEuReceboOsNovosDadosDoProduto(Table table)
+        {
+            _productRequest = table.CreateInstance<ProductCreateDto>();
+        }
+
+        [When(@"eu envio uma requisição PUT para ""(.*)""")]
+        public async Task QuandoEuEnvioUmaRequisicaoPUTPara(string endpoint)
+        {
+            if (endpoint.Contains("<id>"))
+            {
+                var productId = (int)_scenarioContext["CreatedProductId"];
+                endpoint = endpoint.Replace("<id>", productId.ToString());
+            }
+
+            _response = await _apiDriver.PutAsync<ProductCreateDto>(endpoint, _productRequest);
+        }
+
+        [Then("o corpo da resposta deve conter os detalhes atualizados do produto")]
+        public async Task EntaoOCorpoDaRespostaDeveConterOsDetalhesAtualizadosDoProduto()
+        {
+            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
+
+            Assert.That(_productResponse, Is.Not.Null, "A resposta da atualização é nula.");
+
+            Assert.That(_productResponse.Model, Is.EqualTo(_productRequest.Model));
+            Assert.That(_productResponse.ReleaseDate.Date, Is.EqualTo(_productRequest.ReleaseDate.Date));
+            Assert.That(_productResponse.Specifications, Is.EqualTo(_productRequest.Specifications));
+            Assert.That(_productResponse.Price, Is.EqualTo(_productRequest.Price));
+            Assert.That(_productResponse.StockQuantity, Is.EqualTo(_productRequest.StockQuantity));
+            Assert.That(_productResponse.Type, Is.EqualTo((int)_productRequest.Type));
+
+            var originalId = (int)_scenarioContext["CreatedProductId"];
+            Assert.That(_productResponse.Id, Is.EqualTo(originalId), "O ID do produto mudou após o update, o que não deveria acontecer.");
         }
     }
-}
+}   

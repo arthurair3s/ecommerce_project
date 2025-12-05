@@ -78,5 +78,16 @@ namespace ecommerce.Tests.Drivers
             return _lastResponse;
         }
 
+        public async Task<HttpResponseMessage> PutAsync <TRequest>(string endpoint, TRequest requestBody)
+        {
+            _lastResponse = await _httpClient.PutAsJsonAsync(endpoint, requestBody);
+            return _lastResponse;
+        }
+
+        public async Task<HttpResponseMessage> PatchAsync<TRequest>(string endpoint, TRequest requestBody)
+        {
+            _lastResponse = await _httpClient.PatchAsJsonAsync(endpoint, requestBody);
+            return _lastResponse;
+        }
     }
 }

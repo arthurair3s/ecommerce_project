@@ -107,7 +107,7 @@ namespace Ecommerce.Tests.Features
         
         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()
         {
-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 8);
+            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 6);
         }
         
         [global::NUnit.Framework.TestAttribute()]
@@ -192,11 +192,11 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
                             "StockQuantity",
                             "Type"});
                 table2.AddRow(new string[] {
-                            "IPhone",
-                            "2024-01-15",
-                            "128GB, 6GB RAM",
-                            "999.99",
-                            "50",
+                            "Pixel 6",
+                            "2021-10-28",
+                            "128GB, 8GB RAM",
+                            "599.99",
+                            "40",
                             "Smartphone"});
 #line 20
  await testRunner.GivenAsync("que eu tenho produtos validos:", ((string)(null)), table2, "Dado ");
@@ -215,24 +215,15 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
         }
         
         [global::NUnit.Framework.TestAttribute()]
-        [global::NUnit.Framework.DescriptionAttribute("a obtenção de um produto por ID deve ser bem-sucedida")]
+        [global::NUnit.Framework.DescriptionAttribute("a listagem de um produto específico deve ser bem-sucedida")]
         [global::NUnit.Framework.CategoryAttribute("GET")]
-        [global::NUnit.Framework.TestCaseAttribute("3", "2", null)]
-        [global::NUnit.Framework.TestCaseAttribute("4", "3", null)]
-        [global::NUnit.Framework.TestCaseAttribute("7", "4", null)]
-        public async global::System.Threading.Tasks.Task AObtencaoDeUmProdutoPorIDDeveSerBem_Sucedida(string id, string @__pickleIndex, string[] exampleTags)
+        public async global::System.Threading.Tasks.Task AListagemDeUmProdutoEspecificoDeveSerBem_Sucedida()
         {
-            string[] @__tags = new string[] {
+            string[] tagsOfScenario = new string[] {
                     "GET"};
-            if ((exampleTags != null))
-            {
-                @__tags = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Concat(@__tags, exampleTags));
-            }
-            string[] tagsOfScenario = @__tags;
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            argumentsOfScenario.Add("id", id);
-            string pickleIndex = @__pickleIndex;
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a obtenção de um produto por ID deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
+            string pickleIndex = "2";
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a listagem de um produto específico deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
 #line 28
@@ -245,17 +236,31 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
+                global::Reqnroll.Table table3 = new global::Reqnroll.Table(new string[] {
+                            "Model",
+                            "ReleaseDate",
+                            "Specifications",
+                            "Price",
+                            "StockQuantity",
+                            "Type"});
+                table3.AddRow(new string[] {
+                            "Galaxy S21",
+                            "2021-01-29",
+                            "128GB, 8GB RAM",
+                            "799.99",
+                            "30",
+                            "Smartphone"});
 #line 29
- await testRunner.GivenAsync(string.Format("que existe um produto com ID {0} no sistema", id), ((string)(null)), ((global::Reqnroll.Table)(null)), "Dado ");
-#line hidden
-#line 30
- await testRunner.WhenAsync("eu envio uma requisição GET para \"/api/products/1\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
-#line hidden
-#line 31
- await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");
+ await testRunner.GivenAsync("que eu tenho um produto valido:", ((string)(null)), table3, "Dado ");
 #line hidden
 #line 32
- await testRunner.AndAsync(string.Format("o corpo da resposta deve conter os detalhes do produto com ID {0}", id), ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
+ await testRunner.WhenAsync("eu envio uma requisição GET para \"/api/products/<id>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
+#line hidden
+#line 33
+ await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");
+#line hidden
+#line 34
+ await testRunner.AndAsync("o corpo da resposta deve conter os detalhes do produto cadastrado", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -269,11 +274,11 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             string[] tagsOfScenario = new string[] {
                     "UPDATE"};
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            string pickleIndex = "5";
+            string pickleIndex = "3";
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a atualização completa de um produto deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);
             string[] tagsOfRule = ((string[])(null));
             global::Reqnroll.RuleInfo ruleInfo = null;
-#line 41
+#line 37
 this.ScenarioInitialize(scenarioInfo, ruleInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -283,6 +288,49 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             else
             {
                 await this.ScenarioStartAsync();
+                global::Reqnroll.Table table4 = new global::Reqnroll.Table(new string[] {
+                            "Model",
+                            "ReleaseDate",
+                            "Specifications",
+                            "Price",
+                            "StockQuantity",
+                            "Type"});
+                table4.AddRow(new string[] {
+                            "Moto G",
+                            "2020-02-20",
+                            "64GB, 4GB RAM",
+                            "299.99",
+                            "20",
+                            "Smartphone"});
+#line 38
+ await testRunner.GivenAsync("que eu tenho um produto valido:", ((string)(null)), table4, "Dado ");
+#line hidden
+                global::Reqnroll.Table table5 = new global::Reqnroll.Table(new string[] {
+                            "Model",
+                            "ReleaseDate",
+                            "Specifications",
+                            "Price",
+                            "StockQuantity",
+                            "Type"});
+                table5.AddRow(new string[] {
+                            "Edit",
+                            "2020-02-20",
+                            "64GB, 4GB RAM",
+                            "99.99",
+                            "20",
+                            "Smartphone"});
+#line 41
+ await testRunner.AndAsync("eu recebo os novos dados do produto:", ((string)(null)), table5, "E ");
+#line hidden
+#line 44
+ await testRunner.WhenAsync("eu envio uma requisição PUT para \"/api/products/<id>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");
+#line hidden
+#line 45
+ await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");
+#line hidden
+#line 46
+ await testRunner.AndAsync("o corpo da resposta deve conter os detalhes atualizados do produto", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");
+#line hidden
             }
             await this.ScenarioCleanupAsync();
         }

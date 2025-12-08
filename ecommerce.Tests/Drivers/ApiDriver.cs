@@ -84,9 +84,16 @@ namespace ecommerce.Tests.Drivers
             return _lastResponse;
         }
 
-        public async Task<HttpResponseMessage> PatchAsync<TRequest>(string endpoint, TRequest requestBody)
+        public async Task<HttpResponseMessage> PatchAsync(string endpoint, string jsonPatchPayload)
         {
-            _lastResponse = await _httpClient.PatchAsJsonAsync(endpoint, requestBody);
+            var content = new StringContent(jsonPatchPayload, System.Text.Encoding.UTF8, "application/json-patch+json");
+
+            var request = new HttpRequestMessage(new HttpMethod("PATCH"), endpoint)
+            {
+                Content = content
+            };
+
+            _lastResponse = await _httpClient.SendAsync(request);
             return _lastResponse;
         }
     }

@@ -44,3 +44,28 @@ Cenário: a atualização completa de um produto deve ser bem-sucedida
 	Quando eu envio uma requisição PUT para "/api/products/<id>"
 	Então a resposta deve ter o código de status 200
 	E o corpo da resposta deve conter os detalhes atualizados do produto
+
+@UPDATE
+Cenário: a atualização parcial de um produto deve ser bem-sucedida
+	Dado que eu tenho um produto valido:
+		|   Model   | ReleaseDate | Specifications | Price  | StockQuantity |    Type    |
+		| Iphone SE | 2020-04-24  | 64GB, 3GB RAM  | 399.99 |            15 | Smartphone |
+	E que eu recebo as operações de atualização:
+		"""
+		[
+		  { "op": "replace", "path": "/price", "value": 99.99 },
+		  { "op": "replace", "path": "/stockQuantity", "value": 3 }
+		]
+		"""
+	Quando eu envio a requisição PATCH para "api/products/<id>"
+	Então a resposta deve ter o código de status 200
+	E o corpo da resposta deve conter os campos atualizados do produto
+
+@DELETE
+Cenário: a exclusão de um produto deve ser bem-sucedida
+	Dado que eu tenho um produto valido:
+		|   Model    | ReleaseDate | Specifications |  Price  | StockQuantity|    Type    |
+		| Nokia 3310 | 2000-09-01  | 16MB, 16MB RAM | 349.99  |           100| Smartphone |
+	Quando eu envio a requisição DELETE para "api/products/<id>"
+	Então a resposta deve ter o código de status 204
+	E ao tentar obter o produto excluído, a resposta deve ter o código de status 404

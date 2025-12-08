@@ -5,6 +5,8 @@ using ecommerce_crud.DTO;
 using NUnit.Framework;
 using Reqnroll.Assist;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace ecommerce.Tests.StepDefinitions
 {
@@ -17,12 +19,19 @@ namespace ecommerce.Tests.StepDefinitions
         private ProductCreateDto _productRequest = null!;
         private HttpResponseMessage _response = null!;
         private ProductResponse _productResponse = null!;
+        private string _patchPayload = null!;
         private List<ProductResponse>? _productListResponse;
 
         public ProductsStepDefinitions(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
             _apiDriver = new ApiDriver();
+        }
+
+        public class PatchOp
+        {
+            public string path { get; set; }
+            public object value { get; set; }
         }
 
         [Given(@"que eu recebo um produto valido:")]
@@ -180,5 +189,111 @@ namespace ecommerce.Tests.StepDefinitions
             var originalId = (int)_scenarioContext["CreatedProductId"];
             Assert.That(_productResponse.Id, Is.EqualTo(originalId), "O ID do produto mudou após o update, o que não deveria acontecer.");
         }
+
+        [Given(@"que eu recebo as operações de atualização:")]
+        public void DadoQueEuReceboAsOperacoesDeAtualizacao(string jsonPayload)
+        {
+            _patchPayload = jsonPayload;
+
+            var operations = JsonConvert.DeserializeObject<List<PatchOp>>(jsonPayload);
+            var updatedFields = new ProductPatchDto();
+
+            if (operations != null)
+            {
+                foreach (var op in operations)
+                {
+                    var path = op.path.ToLower().TrimStart('/');
+
+                    switch (path)
+                    {
+                        case "model":
+                            updatedFields.Model = op.value.ToString();
+                            break;
+                        case "releasedate":
+                            updatedFields.ReleaseDate = DateTime.Parse(op.value.ToString());
+                            break;
+                        case "specifications":
+                            updatedFields.Specifications = op.value.ToString();
+                            break;
+                        case "price":
+                            updatedFields.Price = Convert.ToDecimal(op.value);
+                            break;
+                        case "stockquantity":
+                            updatedFields.StockQuantity = Convert.ToInt32(op.value);
+                            break;
+                        case "type":
+                            updatedFields.Type = (ecommerce_crud.Models.Enums.ProductType)Convert.ToInt32(op.value);
+                            break;
+                    }
+                }
+            }
+
+            var originalProduct = (ProductResponse)_scenarioContext["CreatedProductObj"];
+
+            _productRequest = new ProductCreateDto
+            {
+                Model = updatedFields.Model ?? originalProduct.Model,
+                ReleaseDate = updatedFields.ReleaseDate ?? originalProduct.ReleaseDate,
+                Specifications = updatedFields.Specifications ?? originalProduct.Specifications,
+                Price = updatedFields.Price ?? originalProduct.Price,
+                StockQuantity = updatedFields.StockQuantity ?? originalProduct.StockQuantity,
+                Type = (ecommerce_crud.Models.Enums.ProductType)(updatedFields.Type.HasValue ? (int)updatedFields.Type.Value : originalProduct.Type),
+            };
+        }
+
+        [When(@"eu envio a requisição PATCH para ""(.*)""")]
+        public async Task QuandoEuEnvioARequisicaoPATCHPara(string endpoint)
+        {
+            if (endpoint.Contains("<id>"))
+            {
+                var productId = (int)_scenarioContext["CreatedProductId"];
+                endpoint = endpoint.Replace("<id>", productId.ToString());
+            }
+
+            _response = await _apiDriver.PatchAsync(endpoint, _patchPayload);
+        }
+
+        [Then(@"o corpo da resposta deve conter os campos atualizados do produto")]
+        public async Task EntaoOCorpoDaRespostaDeveConterOsCamposAtualizadosDoProduto()
+        {
+            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();
+
+            Assert.That(_productResponse, Is.Not.Null, "A resposta do PATCH é nula.");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(_productResponse.Model, Is.EqualTo(_productRequest.Model), "O campo Model está incorreto.");
+                Assert.That(_productResponse.ReleaseDate.Date, Is.EqualTo(_productRequest.ReleaseDate.Date), "O campo ReleaseDate está incorreto.");
+                Assert.That(_productResponse.Specifications, Is.EqualTo(_productRequest.Specifications), "O campo Specifications está incorreto.");
+                Assert.That(_productResponse.Price, Is.EqualTo(_productRequest.Price), "O campo Price (atualizado) está incorreto.");
+                Assert.That(_productResponse.StockQuantity, Is.EqualTo(_productRequest.StockQuantity), "O campo StockQuantity (atualizado) está incorreto.");
+                Assert.That(_productResponse.Type, Is.EqualTo((int)_productRequest.Type), "O campo Type está incorreto.");
+
+                var originalId = (int)_scenarioContext["CreatedProductId"];
+                Assert.That(_productResponse.Id, Is.EqualTo(originalId), "O ID do produto não deve mudar após o update.");
+            });
+        }
+
+        [When(@"eu envio a requisição DELETE para ""(.*)""")]
+        public void QuandoEuEnvioARequisicaoDELETEPara(string endpoint)
+        {
+            if (endpoint.Contains("<id>"))
+            {
+                var productId = (int)_scenarioContext["CreatedProductId"];
+                endpoint = endpoint.Replace("<id>", productId.ToString());
+            }
+
+            _response = _apiDriver.DeleteAsync(endpoint).GetAwaiter().GetResult();
+        }
+
+        [Then(@"ao tentar obter o produto excluído, a resposta deve ter o código de status (.*)")]
+        public void EntaoAoTentarObterOProdutoExcluidoARespostaDeveTerOCodigoDeStatus(int statusCode)
+        {
+            var productId = (int)_scenarioContext["CreatedProductId"];
+            var getResponse = _apiDriver.GetAsync($"api/products/{productId}").GetAwaiter().GetResult();
+
+            Assert.That((int)getResponse.StatusCode, Is.EqualTo(statusCode), "O código de status ao obter o produto excluído está incorreto.");
+        }
+
     }
 }   

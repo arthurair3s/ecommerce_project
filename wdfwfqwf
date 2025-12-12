@@ -1,0 +1,334 @@
+[33mcommit a23c2bbaccc2e74d9e6d382298e584905d0ec332[m
+Author: arthurair3s <arthuraires0@gmail.com>
+Date:   Mon Dec 8 11:25:23 2025 -0300
+
+    feature: continues creating the integration test focusing on PATCH and DELETE
+    
+    - updates ProductController to return the product body instead of NoContent
+    - adds the methods for PATCH to ApiDriver
+    - adds the BDD test scenarios to .feature
+    - adds the tests to StepDefinition and adjusts the code
+    - clean up some unnecessary files
+
+[1mdiff --git a/System.Text.Json.JsonReaderException b/System.Text.Json.JsonReaderException[m
+[1mdeleted file mode 100644[m
+[1mindex e69de29..0000000[m
+[1mdiff --git a/done b/done[m
+[1mdeleted file mode 100644[m
+[1mindex e69de29..0000000[m
+[1mdiff --git a/ecommerce.Api/Controllers/ProductsController.cs b/ecommerce.Api/Controllers/ProductsController.cs[m
+[1mindex 61f6a38..ed2c972 100644[m
+[1m--- a/ecommerce.Api/Controllers/ProductsController.cs[m
+[1m+++ b/ecommerce.Api/Controllers/ProductsController.cs[m
+[36m@@ -100,7 +100,7 @@[m [mnamespace ecommerce_crud.Controllers[m
+ [m
+             await _appDbContext.SaveChangesAsync();[m
+ [m
+[31m-            return NoContent();[m
+[32m+[m[32m            return Ok(product);[m
+         }[m
+ [m
+         [HttpPut("{id}")][m
+[1mdiff --git a/ecommerce.Tests/Drivers/ApiDriver.cs b/ecommerce.Tests/Drivers/ApiDriver.cs[m
+[1mindex 1b426b0..938c87f 100644[m
+[1m--- a/ecommerce.Tests/Drivers/ApiDriver.cs[m
+[1m+++ b/ecommerce.Tests/Drivers/ApiDriver.cs[m
+[36m@@ -84,9 +84,16 @@[m [mnamespace ecommerce.Tests.Drivers[m
+             return _lastResponse;[m
+         }[m
+ [m
+[31m-        public async Task<HttpResponseMessage> PatchAsync<TRequest>(string endpoint, TRequest requestBody)[m
+[32m+[m[32m        public async Task<HttpResponseMessage> PatchAsync(string endpoint, string jsonPatchPayload)[m
+         {[m
+[31m-            _lastResponse = await _httpClient.PatchAsJsonAsync(endpoint, requestBody);[m
+[32m+[m[32m            var content = new StringContent(jsonPatchPayload, System.Text.Encoding.UTF8, "application/json-patch+json");[m
+[32m+[m
+[32m+[m[32m            var request = new HttpRequestMessage(new HttpMethod("PATCH"), endpoint)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                Content = content[m
+[32m+[m[32m            };[m
+[32m+[m
+[32m+[m[32m            _lastResponse = await _httpClient.SendAsync(request);[m
+             return _lastResponse;[m
+         }[m
+     }[m
+[1mdiff --git a/ecommerce.Tests/Features/Products.feature b/ecommerce.Tests/Features/Products.feature[m
+[1mindex 4868aee..e67b609 100644[m
+[1m--- a/ecommerce.Tests/Features/Products.feature[m
+[1m+++ b/ecommerce.Tests/Features/Products.feature[m
+[36m@@ -43,4 +43,29 @@[m [mCenário: a atualização completa de um produto deve ser bem-sucedida[m
+ 		| Edit  | 2020-02-20  | 64GB, 4GB RAM  | 99.99  |            20 | Smartphone |[m
+ 	Quando eu envio uma requisição PUT para "/api/products/<id>"[m
+ 	Então a resposta deve ter o código de status 200[m
+[31m-	E o corpo da resposta deve conter os detalhes atualizados do produto[m
+\ No newline at end of file[m
+[32m+[m	[32mE o corpo da resposta deve conter os detalhes atualizados do produto[m
+[32m+[m
+[32m+[m[32m@UPDATE[m
+[32m+[m[32mCenário: a atualização parcial de um produto deve ser bem-sucedida[m
+[32m+[m	[32mDado que eu tenho um produto valido:[m
+[32m+[m		[32m|   Model   | ReleaseDate | Specifications | Price  | StockQuantity |    Type    |[m
+[32m+[m		[32m| Iphone SE | 2020-04-24  | 64GB, 3GB RAM  | 399.99 |            15 | Smartphone |[m
+[32m+[m	[32mE que eu recebo as operações de atualização:[m
+[32m+[m		[32m"""[m
+[32m+[m		[32m[[m
+[32m+[m		[32m  { "op": "replace", "path": "/price", "value": 99.99 },[m
+[32m+[m		[32m  { "op": "replace", "path": "/stockQuantity", "value": 3 }[m
+[32m+[m		[32m][m
+[32m+[m		[32m"""[m
+[32m+[m	[32mQuando eu envio a requisição PATCH para "api/products/<id>"[m
+[32m+[m	[32mEntão a resposta deve ter o código de status 200[m
+[32m+[m	[32mE o corpo da resposta deve conter os campos atualizados do produto[m
+[32m+[m
+[32m+[m[32m@DELETE[m
+[32m+[m[32mCenário: a exclusão de um produto deve ser bem-sucedida[m
+[32m+[m	[32mDado que eu tenho um produto valido:[m
+[32m+[m		[32m|   Model    | ReleaseDate | Specifications |  Price  | StockQuantity|    Type    |[m
+[32m+[m		[32m| Nokia 3310 | 2000-09-01  | 16MB, 16MB RAM | 349.99  |           100| Smartphone |[m
+[32m+[m	[32mQuando eu envio a requisição DELETE para "api/products/<id>"[m
+[32m+[m	[32mEntão a resposta deve ter o código de status 204[m
+[32m+[m	[32mE ao tentar obter o produto excluído, a resposta deve ter o código de status 404[m
+\ No newline at end of file[m
+[1mdiff --git a/ecommerce.Tests/Features/Products.feature.cs b/ecommerce.Tests/Features/Products.feature.cs[m
+[1mindex 4a1e41f..dcf26e2 100644[m
+[1m--- a/ecommerce.Tests/Features/Products.feature.cs[m
+[1m+++ b/ecommerce.Tests/Features/Products.feature.cs[m
+[36m@@ -107,7 +107,7 @@[m [mnamespace Ecommerce.Tests.Features[m
+         [m
+         private static global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages InitializeCucumberMessages()[m
+         {[m
+[31m-            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 6);[m
+[32m+[m[32m            return new global::Reqnroll.Formatters.RuntimeSupport.FeatureLevelCucumberMessages("Features/Products.feature.ndjson", 8);[m
+         }[m
+         [m
+         [global::NUnit.Framework.TestAttribute()][m
+[36m@@ -330,6 +330,114 @@[m [mthis.ScenarioInitialize(scenarioInfo, ruleInfo);[m
+ #line hidden[m
+ #line 46[m
+  await testRunner.AndAsync("o corpo da resposta deve conter os detalhes atualizados do produto", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m            }[m
+[32m+[m[32m            await this.ScenarioCleanupAsync();[m
+[32m+[m[32m        }[m
+[32m+[m[41m        [m
+[32m+[m[32m        [global::NUnit.Framework.TestAttribute()][m
+[32m+[m[32m        [global::NUnit.Framework.DescriptionAttribute("a atualização parcial de um produto deve ser bem-sucedida")][m
+[32m+[m[32m        [global::NUnit.Framework.CategoryAttribute("UPDATE")][m
+[32m+[m[32m        public async global::System.Threading.Tasks.Task AAtualizacaoParcialDeUmProdutoDeveSerBem_Sucedida()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            string[] tagsOfScenario = new string[] {[m
+[32m+[m[32m                    "UPDATE"};[m
+[32m+[m[32m            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();[m
+[32m+[m[32m            string pickleIndex = "4";[m
+[32m+[m[32m            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a atualização parcial de um produto deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);[m
+[32m+[m[32m            string[] tagsOfRule = ((string[])(null));[m
+[32m+[m[32m            global::Reqnroll.RuleInfo ruleInfo = null;[m
+[32m+[m[32m#line 49[m
+[32m+[m[32mthis.ScenarioInitialize(scenarioInfo, ruleInfo);[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                await testRunner.SkipScenarioAsync();[m
+[32m+[m[32m            }[m
+[32m+[m[32m            else[m
+[32m+[m[32m            {[m
+[32m+[m[32m                await this.ScenarioStartAsync();[m
+[32m+[m[32m                global::Reqnroll.Table table6 = new global::Reqnroll.Table(new string[] {[m
+[32m+[m[32m                            "Model",[m
+[32m+[m[32m                            "ReleaseDate",[m
+[32m+[m[32m                            "Specifications",[m
+[32m+[m[32m                            "Price",[m
+[32m+[m[32m                            "StockQuantity",[m
+[32m+[m[32m                            "Type"});[m
+[32m+[m[32m                table6.AddRow(new string[] {[m
+[32m+[m[32m                            "Iphone SE",[m
+[32m+[m[32m                            "2020-04-24",[m
+[32m+[m[32m                            "64GB, 3GB RAM",[m
+[32m+[m[32m                            "399.99",[m
+[32m+[m[32m                            "15",[m
+[32m+[m[32m                            "Smartphone"});[m
+[32m+[m[32m#line 50[m
+[32m+[m[32m await testRunner.GivenAsync("que eu tenho um produto valido:", ((string)(null)), table6, "Dado ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m#line 53[m
+[32m+[m[32m await testRunner.AndAsync("que eu recebo as operações de atualização:", "[\r\n  { \"op\": \"replace\", \"path\": \"/price\", \"value\": 99.99 },\r\n  { \"op\": \"replace\"," +[m
+[32m+[m[32m                        " \"path\": \"/stockQuantity\", \"value\": 3 }\r\n]", ((global::Reqnroll.Table)(null)), "E ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m#line 60[m
+[32m+[m[32m await testRunner.WhenAsync("eu envio a requisição PATCH para \"api/products/<id>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m#line 61[m
+[32m+[m[32m await testRunner.ThenAsync("a resposta deve ter o código de status 200", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m#line 62[m
+[32m+[m[32m await testRunner.AndAsync("o corpo da resposta deve conter os campos atualizados do produto", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m            }[m
+[32m+[m[32m            await this.ScenarioCleanupAsync();[m
+[32m+[m[32m        }[m
+[32m+[m[41m        [m
+[32m+[m[32m        [global::NUnit.Framework.TestAttribute()][m
+[32m+[m[32m        [global::NUnit.Framework.DescriptionAttribute("a exclusão de um produto deve ser bem-sucedida")][m
+[32m+[m[32m        [global::NUnit.Framework.CategoryAttribute("DELETE")][m
+[32m+[m[32m        public async global::System.Threading.Tasks.Task AExclusaoDeUmProdutoDeveSerBem_Sucedida()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            string[] tagsOfScenario = new string[] {[m
+[32m+[m[32m                    "DELETE"};[m
+[32m+[m[32m            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();[m
+[32m+[m[32m            string pickleIndex = "5";[m
+[32m+[m[32m            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("a exclusão de um produto deve ser bem-sucedida", null, tagsOfScenario, argumentsOfScenario, featureTags, pickleIndex);[m
+[32m+[m[32m            string[] tagsOfRule = ((string[])(null));[m
+[32m+[m[32m            global::Reqnroll.RuleInfo ruleInfo = null;[m
+[32m+[m[32m#line 65[m
+[32m+[m[32mthis.ScenarioInitialize(scenarioInfo, ruleInfo);[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                await testRunner.SkipScenarioAsync();[m
+[32m+[m[32m            }[m
+[32m+[m[32m            else[m
+[32m+[m[32m            {[m
+[32m+[m[32m                await this.ScenarioStartAsync();[m
+[32m+[m[32m                global::Reqnroll.Table table7 = new global::Reqnroll.Table(new string[] {[m
+[32m+[m[32m                            "Model",[m
+[32m+[m[32m                            "ReleaseDate",[m
+[32m+[m[32m                            "Specifications",[m
+[32m+[m[32m                            "Price",[m
+[32m+[m[32m                            "StockQuantity",[m
+[32m+[m[32m                            "Type"});[m
+[32m+[m[32m                table7.AddRow(new string[] {[m
+[32m+[m[32m                            "Nokia 3310",[m
+[32m+[m[32m                            "2000-09-01",[m
+[32m+[m[32m                            "16MB, 16MB RAM",[m
+[32m+[m[32m                            "349.99",[m
+[32m+[m[32m                            "100",[m
+[32m+[m[32m                            "Smartphone"});[m
+[32m+[m[32m#line 66[m
+[32m+[m[32m await testRunner.GivenAsync("que eu tenho um produto valido:", ((string)(null)), table7, "Dado ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m#line 69[m
+[32m+[m[32m await testRunner.WhenAsync("eu envio a requisição DELETE para \"api/products/<id>\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Quando ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m#line 70[m
+[32m+[m[32m await testRunner.ThenAsync("a resposta deve ter o código de status 204", ((string)(null)), ((global::Reqnroll.Table)(null)), "Então ");[m
+[32m+[m[32m#line hidden[m
+[32m+[m[32m#line 71[m
+[32m+[m[32m await testRunner.AndAsync("ao tentar obter o produto excluído, a resposta deve ter o código de status 404", ((string)(null)), ((global::Reqnroll.Table)(null)), "E ");[m
+ #line hidden[m
+             }[m
+             await this.ScenarioCleanupAsync();[m
+[1mdiff --git a/ecommerce.Tests/StepDefinitions/ProductsStepDefinitions.cs b/ecommerce.Tests/StepDefinitions/ProductsStepDefinitions.cs[m
+[1mindex 3f4e114..3ca1804 100644[m
+[1m--- a/ecommerce.Tests/StepDefinitions/ProductsStepDefinitions.cs[m
+[1m+++ b/ecommerce.Tests/StepDefinitions/ProductsStepDefinitions.cs[m
+[36m@@ -5,6 +5,8 @@[m [musing ecommerce_crud.DTO;[m
+ using NUnit.Framework;[m
+ using Reqnroll.Assist;[m
+ using System.Threading.Tasks;[m
+[32m+[m[32musing Newtonsoft.Json;[m
+[32m+[m[32musing System.Collections.Generic;[m
+ [m
+ namespace ecommerce.Tests.StepDefinitions[m
+ {[m
+[36m@@ -17,6 +19,7 @@[m [mnamespace ecommerce.Tests.StepDefinitions[m
+         private ProductCreateDto _productRequest = null!;[m
+         private HttpResponseMessage _response = null!;[m
+         private ProductResponse _productResponse = null!;[m
+[32m+[m[32m        private string _patchPayload = null!;[m
+         private List<ProductResponse>? _productListResponse;[m
+ [m
+         public ProductsStepDefinitions(ScenarioContext scenarioContext)[m
+[36m@@ -25,6 +28,12 @@[m [mnamespace ecommerce.Tests.StepDefinitions[m
+             _apiDriver = new ApiDriver();[m
+         }[m
+ [m
+[32m+[m[32m        public class PatchOp[m
+[32m+[m[32m        {[m
+[32m+[m[32m            public string path { get; set; }[m
+[32m+[m[32m            public object value { get; set; }[m
+[32m+[m[32m        }[m
+[32m+[m
+         [Given(@"que eu recebo um produto valido:")][m
+         public void DadoQueEuReceboUmProdutoValido(ProductCreateDto productDto)[m
+         {[m
+[36m@@ -180,5 +189,111 @@[m [mnamespace ecommerce.Tests.StepDefinitions[m
+             var originalId = (int)_scenarioContext["CreatedProductId"];[m
+             Assert.That(_productResponse.Id, Is.EqualTo(originalId), "O ID do produto mudou após o update, o que não deveria acontecer.");[m
+         }[m
+[32m+[m
+[32m+[m[32m        [Given(@"que eu recebo as operações de atualização:")][m
+[32m+[m[32m        public void DadoQueEuReceboAsOperacoesDeAtualizacao(string jsonPayload)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            _patchPayload = jsonPayload;[m
+[32m+[m
+[32m+[m[32m            var operations = JsonConvert.DeserializeObject<List<PatchOp>>(jsonPayload);[m
+[32m+[m[32m            var updatedFields = new ProductPatchDto();[m
+[32m+[m
+[32m+[m[32m            if (operations != null)[m
+[32m+[m[32m            {[m
+[32m+[m[32m                foreach (var op in operations)[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    var path = op.path.ToLower().TrimStart('/');[m
+[32m+[m
+[32m+[m[32m                    switch (path)[m
+[32m+[m[32m                    {[m
+[32m+[m[32m                        case "model":[m
+[32m+[m[32m                            updatedFields.Model = op.value.ToString();[m
+[32m+[m[32m                            break;[m
+[32m+[m[32m                        case "releasedate":[m
+[32m+[m[32m                            updatedFields.ReleaseDate = DateTime.Parse(op.value.ToString());[m
+[32m+[m[32m                            break;[m
+[32m+[m[32m                        case "specifications":[m
+[32m+[m[32m                            updatedFields.Specifications = op.value.ToString();[m
+[32m+[m[32m                            break;[m
+[32m+[m[32m                        case "price":[m
+[32m+[m[32m                            updatedFields.Price = Convert.ToDecimal(op.value);[m
+[32m+[m[32m                            break;[m
+[32m+[m[32m                        case "stockquantity":[m
+[32m+[m[32m                            updatedFields.StockQuantity = Convert.ToInt32(op.value);[m
+[32m+[m[32m                            break;[m
+[32m+[m[32m                        case "type":[m
+[32m+[m[32m                            updatedFields.Type = (ecommerce_crud.Models.Enums.ProductType)Convert.ToInt32(op.value);[m
+[32m+[m[32m                            break;[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            var originalProduct = (ProductResponse)_scenarioContext["CreatedProductObj"];[m
+[32m+[m
+[32m+[m[32m            _productRequest = new ProductCreateDto[m
+[32m+[m[32m            {[m
+[32m+[m[32m                Model = updatedFields.Model ?? originalProduct.Model,[m
+[32m+[m[32m                ReleaseDate = updatedFields.ReleaseDate ?? originalProduct.ReleaseDate,[m
+[32m+[m[32m                Specifications = updatedFields.Specifications ?? originalProduct.Specifications,[m
+[32m+[m[32m                Price = updatedFields.Price ?? originalProduct.Price,[m
+[32m+[m[32m                StockQuantity = updatedFields.StockQuantity ?? originalProduct.StockQuantity,[m
+[32m+[m[32m                Type = (ecommerce_crud.Models.Enums.ProductType)(updatedFields.Type.HasValue ? (int)updatedFields.Type.Value : originalProduct.Type),[m
+[32m+[m[32m            };[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        [When(@"eu envio a requisição PATCH para ""(.*)""")][m
+[32m+[m[32m        public async Task QuandoEuEnvioARequisicaoPATCHPara(string endpoint)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            if (endpoint.Contains("<id>"))[m
+[32m+[m[32m            {[m
+[32m+[m[32m                var productId = (int)_scenarioContext["CreatedProductId"];[m
+[32m+[m[32m                endpoint = endpoint.Replace("<id>", productId.ToString());[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            _response = await _apiDriver.PatchAsync(endpoint, _patchPayload);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        [Then(@"o corpo da resposta deve conter os campos atualizados do produto")][m
+[32m+[m[32m        public async Task EntaoOCorpoDaRespostaDeveConterOsCamposAtualizadosDoProduto()[m
+[32m+[m[32m        {[m
+[32m+[m[32m            _productResponse = await _apiDriver.GetResponseBodyAs<ProductResponse>();[m
+[32m+[m
+[32m+[m[32m            Assert.That(_productResponse, Is.Not.Null, "A resposta do PATCH é nula.");[m
+[32m+[m
+[32m+[m[32m            Assert.Multiple(() =>[m
+[32m+[m[32m            {[m
+[32m+[m[32m                Assert.That(_productResponse.Model, Is.EqualTo(_productRequest.Model), "O campo Model está incorreto.");[m
+[32m+[m[32m                Assert.That(_productResponse.ReleaseDate.Date, Is.EqualTo(_productRequest.ReleaseDate.Date), "O campo ReleaseDate está incorreto.");[m
+[32m+[m[32m                Assert.That(_productResponse.Specifications, Is.EqualTo(_productRequest.Specifications), "O campo Specifications está incorreto.");[m
+[32m+[m[32m                Assert.That(_productResponse.Price, Is.EqualTo(_productRequest.Pric

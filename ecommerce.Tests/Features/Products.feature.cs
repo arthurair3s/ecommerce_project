@@ -28,7 +28,7 @@ namespace Ecommerce.Tests.Features
         private static string[] featureTags = ((string[])(null));
         
         private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("pt"), "Features", "Produtos do E-commerce", "  Como um usuário do e-commerce\r\n  Quero executar todos as ações possiveis\r\n  Par" +
-                "a gerenciar meus produtos eficientemente\r\n  Ações: POST, GET, PATCH, PUT e DELET" +
+                "a gerenciar meus produtos eficientemente\r\n  Ações: POST, GET, PUT, PATCH e DELET" +
                 "E", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags, InitializeCucumberMessages());
         
 #line 1 "Products.feature"

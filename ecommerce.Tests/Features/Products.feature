@@ -4,7 +4,7 @@ Funcionalidade: Produtos do E-commerce
   Como um usuário do e-commerce
   Quero executar todos as ações possiveis
   Para gerenciar meus produtos eficientemente
-  Ações: POST, GET, PATCH, PUT e DELETE
+  Ações: POST, GET, PUT, PATCH e DELETE
 
 @POST
 Cenário: a criação de um produto deve ser bem-sucedida
@@ -27,7 +27,7 @@ Cenário: a listagem de produtos deve ser bem-sucedida
 @GET
 Cenário: a listagem de um produto específico deve ser bem-sucedida
 	Dado que eu tenho um produto valido:
-		| Model      | ReleaseDate | Specifications   | Price   | StockQuantity |    Type    |
+		|    Model   | ReleaseDate | Specifications   | Price   | StockQuantity |    Type    |
 		| Galaxy S21 | 2021-01-29  | 128GB, 8GB RAM   | 799.99  |            30 | Smartphone |
 	Quando eu envio uma requisição GET para "/api/products/<id>"
 	Então a resposta deve ter o código de status 200

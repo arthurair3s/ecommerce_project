@@ -14,7 +14,8 @@ namespace ecommerce.Tests.Drivers
 
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.json", optional: false)
+                .AddJsonFile("appsettings.Test.json", optional: true)
                 .Build();
 
             var configUrl = configuration["ApiSettings:BaseUrl"];
